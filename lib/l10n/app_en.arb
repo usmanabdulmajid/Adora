@@ -1,0 +1,33 @@
+{
+  "@@locale": "en",
+  "appTitle": "Location Tracker",
+  "appBarTitle": "Location Tracker",
+  "backgroundTrackingDialogTitle": "Background Tracking Requires Always Allow",
+  "backgroundTrackingDialogContent": "To track your location even when the app is closed or in the background, please enable \"Allow all the time\" location access in system settings.",
+  "cancel": "Cancel",
+  "openSettings": "Open Settings",
+  "backgroundTracking": "Background Tracking",
+  "active": "Active",
+  "inactive": "Inactive",
+  "loading": "Loading...",
+  "currentLocation": "Current Location",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "timestamp": "Timestamp",
+  "unableToGetLocation": "Unable to get location: {error}",
+  "@unableToGetLocation": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "trackingHistory": "Tracking History (Last 10)",
+  "noLocationData": "No location data recorded yet",
+  "failedToLoadHistory": "Failed to load history: {error}",
+  "@failedToLoadHistory": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "locationPermissionGranted": "Location Permission: Granted",
+  "locationPermissionDenied": "Location Permission: Denied"
+}
