@@ -29,5 +29,7 @@
     }
   },
   "locationPermissionGranted": "Location Permission: Granted",
-  "locationPermissionDenied": "Location Permission: Denied"
+  "locationPermissionDenied": "Location Permission: Denied",
+  "locationPermissionRequiredTitle": "Location permission required",
+  "locationPermissionRequiredDescription": "Enable location access to track your position"
 }

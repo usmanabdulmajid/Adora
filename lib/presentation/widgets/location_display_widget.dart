@@ -11,8 +11,9 @@ class LocationDisplayWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final permissionAsync = ref.watch(permissionStatusProvider);
     final locationAsync = ref.watch(currentLocationStreamProvider);
-
+    final hasPermission = permissionAsync.asData?.value ?? false;
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -24,7 +25,9 @@ class LocationDisplayWidget extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.location_on,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: hasPermission
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -34,38 +37,89 @@ class LocationDisplayWidget extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 12),
-            locationAsync.when(
-              data: (location) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _infoRow(l10n.latitude, location.latitude.toStringAsFixed(6)),
-                  const SizedBox(height: 4),
-                  _infoRow(
-                    l10n.longitude,
-                    location.longitude.toStringAsFixed(6),
+            permissionAsync.when(
+              data: (granted) {
+                if (!granted) {
+                  return _permissionDeniedContent(l10n, context);
+                }
+                return locationAsync.when(
+                  data: (location) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _infoRow(
+                        l10n.latitude,
+                        location.latitude.toStringAsFixed(6),
+                      ),
+                      const SizedBox(height: 4),
+                      _infoRow(
+                        l10n.longitude,
+                        location.longitude.toStringAsFixed(6),
+                      ),
+                      const SizedBox(height: 4),
+                      _infoRow(
+                        l10n.timestamp,
+                        DateFormat(
+                          'yyyy-MM-dd HH:mm:ss',
+                        ).format(location.timestamp),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  _infoRow(
-                    l10n.timestamp,
-                    DateFormat(
-                      'yyyy-MM-dd HH:mm:ss',
-                    ).format(location.timestamp),
+                  error: (err, _) => Text(
+                    l10n.unableToGetLocation('$err'),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
-                ],
-              ),
-              error: (err, _) => Text(
-                l10n.unableToGetLocation('$err'),
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                );
+              },
+              error: (_, _) => Text(
+                l10n.locationPermissionRequiredTitle,
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
+              loading: () => const SizedBox.shrink(),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _permissionDeniedContent(AppLocalizations l10n, BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Icon(
+            Icons.lock,
+            size: 40,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.locationPermissionRequiredTitle,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.locationPermissionRequiredDescription,
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
       ),
     );
   }

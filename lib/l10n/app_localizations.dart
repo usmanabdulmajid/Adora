@@ -213,6 +213,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location Permission: Denied'**
   String get locationPermissionDenied;
+
+  /// No description provided for @locationPermissionRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission required'**
+  String get locationPermissionRequiredTitle;
+
+  /// No description provided for @locationPermissionRequiredDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable location access to track your position'**
+  String get locationPermissionRequiredDescription;
 }
 
 class _AppLocalizationsDelegate

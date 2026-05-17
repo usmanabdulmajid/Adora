@@ -165,58 +165,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     AsyncValue<bool> trackingAsync,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final permissionAsync = ref.watch(permissionStatusProvider);
+    final hasPermission = permissionAsync.asData?.value ?? false;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(
-          children: [
-            Icon(
-              Icons.track_changes,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.backgroundTracking,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  trackingAsync.when(
-                    data: (isRunning) => Text(
-                      isRunning ? l10n.active : l10n.inactive,
+      child: Opacity(
+        opacity: hasPermission ? 1.0 : 0.5,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.track_changes,
+                color: hasPermission
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.backgroundTracking,
                       style: TextStyle(
-                        fontSize: 13,
-                        color: isRunning ? Colors.green : Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        color: hasPermission ? null : Colors.grey,
                       ),
                     ),
-                    error: (_, _) => Text(
-                      l10n.inactive,
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                    loading: () => Text(
-                      l10n.loading,
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                  ),
-                ],
+                    if (hasPermission)
+                      trackingAsync.when(
+                        data: (isRunning) => Text(
+                          isRunning ? l10n.active : l10n.inactive,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isRunning ? Colors.green : Colors.grey,
+                          ),
+                        ),
+                        error: (_, _) => Text(
+                          l10n.inactive,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        loading: () => Text(
+                          l10n.loading,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        l10n.locationPermissionRequiredTitle,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey,
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            trackingAsync.isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Switch(
-                    value: trackingAsync.asData?.value ?? false,
-                    onChanged: (_) {
-                      ref.read(trackingStateProvider.notifier).toggle();
-                    },
-                  ),
-          ],
+              if (trackingAsync.isLoading)
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              else
+                Switch(
+                  value: trackingAsync.asData?.value ?? false,
+                  onChanged: hasPermission
+                      ? (_) {
+                          ref.read(trackingStateProvider.notifier).toggle();
+                        }
+                      : null,
+                ),
+            ],
+          ),
         ),
       ),
     );

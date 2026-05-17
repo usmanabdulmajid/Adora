@@ -73,4 +73,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get locationPermissionDenied => 'Location Permission: Denied';
+
+  @override
+  String get locationPermissionRequiredTitle => 'Location permission required';
+
+  @override
+  String get locationPermissionRequiredDescription =>
+      'Enable location access to track your position';
 }
