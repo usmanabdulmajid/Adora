@@ -46,9 +46,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       final either = await repository.hasBackgroundPermission();
       final hasPerm = either.fold((_) => false, (has) => has);
       if (hasPerm) {
-        ref.read(pendingPermissionDialogProvider.notifier).dismiss();
         ref.read(trackingStateProvider.notifier).toggle();
       }
+      ref.read(pendingPermissionDialogProvider.notifier).dismiss();
     }
   }
 
