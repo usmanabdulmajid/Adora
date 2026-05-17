@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '../datasources/location_local_datasource.dart';
 import '../models/location_model.dart';
+import 'notification_service.dart';
 
 class BackgroundService {
   static final FlutterBackgroundService _service = FlutterBackgroundService();
@@ -55,6 +57,12 @@ void _onStart(ServiceInstance service) async {
   final localDataSource = LocationLocalDataSource();
   await localDataSource.initialize();
 
+  final notificationService = LocationNotificationService();
+  await notificationService.initialize();
+
+  DateTime? lastNotificationUpdate;
+  const throttleDuration = Duration(seconds: 2);
+
   service.on('stopService').listen((event) {
     service.stopSelf();
   });
@@ -80,6 +88,19 @@ void _onStart(ServiceInstance service) async {
         'longitude': position.longitude,
         'timestamp': DateTime.now().toIso8601String(),
       });
+
+      // Update notification with throttling
+      final now = DateTime.now();
+      if (lastNotificationUpdate == null ||
+          now.difference(lastNotificationUpdate!) >= throttleDuration) {
+        await notificationService.showPersistentNotification(
+          model.latitude,
+          model.longitude,
+          DateFormat('HH:mm:ss').format(model.timestamp),
+        );
+
+        lastNotificationUpdate = now;
+      }
     } catch (_) {}
   });
 }

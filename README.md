@@ -43,6 +43,57 @@ lib/
 - `StreamProvider` for real-time location stream
 - `FutureProvider` for location history and permission status
 - All errors handled via `AsyncValue.when()` pattern - exceptions never reach UI
+- Notification providers integrate with tracking state lifecycle
+
+## Notification Architecture
+
+The persistent location notification feature follows Clean Architecture principles:
+
+### Domain Layer
+- **`NotificationRepository`** abstract interface defines notification operations
+- **Use cases**: `ShowLocationNotificationUseCase`, `UpdateLocationNotificationUseCase`, `HideLocationNotificationUseCase`
+
+### Data Layer
+- **`LocationNotificationService`** wraps `flutter_local_notifications` plugin
+- **`NotificationRepositoryImpl`** implements the repository with platform-specific logic
+- Methods:
+  - `showTrackingNotification()` - Display notification with location data
+  - `updateTrackingNotification()` - Update notification on location change
+  - `hideTrackingNotification()` - Remove notification when tracking stops
+
+### Presentation Layer
+- **`TrackingStateNotifier`** integrates notification lifecycle with tracking toggle
+- When tracking starts: Shows initial "Acquiring location..." notification
+- When location updates arrive: Updates notification with latest lat/lon (throttled)
+- When tracking stops: Hides notification
+- Automatic sync on app resume if tracking was previously active
+
+### Platform-Specific Behavior
+
+#### Android Notification
+```
+┌─────────────────────────────────────┐
+│ 📍 Location Tracker           [menu] │
+├─────────────────────────────────────┤
+│ Latitude: 37.7749° N                │
+│ Longitude: 122.4194° W              │
+│ Updated: 2 seconds ago              │
+│                                     │
+│ [Stop Tracking]                     │
+└─────────────────────────────────────┘
+```
+- **Non-dismissible** (ongoing: true, autoCancel: false)
+- **Cannot be swiped away** by the user
+- **Persists** even when app is backgrounded or terminated (while foreground service runs)
+- **Updates** with throttling (max once per 2 seconds)
+- **Notification Channel**: `location_tracking_channel` with high importance
+
+#### iOS Notification
+- **Dismissible** (platform limitation - iOS doesn't allow truly non-dismissible notifications)
+- Reliant on system's **blue location indicator** in status bar for persistent visual cue
+- Notifications can be cleared but system indicator remains
+- Same content format as Android
+- Complies with iOS background execution guidelines
 
 ## Features
 
@@ -52,11 +103,23 @@ lib/
 - High-accuracy location using `geolocator`
 - Real-time latitude/longitude display
 
+### Persistent Location Tracking Notification
+- **Non-dismissible notification on Android**: Shows current location (latitude, longitude, timestamp) while tracking is active
+  - Cannot be swiped away or cleared by the user
+  - Automatically updates every location fix (throttled to max once per 2 seconds)
+  - Displays "Acquiring location..." until first GPS fix
+  - Includes optional "Stop Tracking" action button
+  - Remains visible even when app is backgrounded or terminated
+- **iOS approach**: Uses local notifications (can be dismissed) with system's blue location indicator remaining visible
+- Real-time updates with relative time formatting ("Just now", "5 seconds ago", etc.)
+- Fully localized notification strings
+
 ### Background & Terminated State Tracking
 - **Background**: Uses `flutter_background_service` with Android foreground service (persistent notification)
 - **Terminated State**: Android foreground service survives app termination on most devices
 - **iOS**: Background location mode enabled via `UIBackgroundModes` in Info.plist
 - Toggle switch to enable/disable background tracking
+- Notification appears/disappears based on tracking state
 
 ### Data Persistence
 - Locations recorded every 10 seconds (background) or on distance change (foreground, 10m filter)
@@ -105,7 +168,15 @@ The following permissions are configured in `AndroidManifest.xml`:
 
 Foreground service is declared with `android:foregroundServiceType="location"`.
 
-The notification channel `location_tracking_channel` is created by `flutter_background_service` at runtime.
+**Notification Configuration:**
+- Two notification channels are used:
+  - `foreground_service_channel` (created by flutter_background_service) - Primary foreground service indicator
+  - `location_tracking_channel` (created by flutter_local_notifications) - Location updates display
+- The location notification is configured with:
+  - `Importance.high` and `Priority.high` for visibility
+  - `ongoing: true` to prevent user dismissal
+  - `autoCancel: false` to prevent accidental clearing
+  - Action button: "Stop Tracking" (optional, for user control)
 
 #### iOS
 The following entries are configured in `Info.plist`:
@@ -119,6 +190,11 @@ Additionally, you must enable **Background Modes > Location updates** in Xcode:
 3. Go to **Signing & Capabilities**
 4. Add the **Background Modes** capability
 5. Check **Location updates**
+
+**Notification Behavior on iOS:**
+- Uses local notifications for location updates (can be dismissed)
+- System automatically shows blue location indicator in status bar when background location is active
+- Reliance on system indicator as the primary persistent visual cue (user cannot dismiss)
 
 ## How Terminated State Tracking Works
 
@@ -150,6 +226,7 @@ Tracking after the app is terminated (swiped away from recents) is achieved thro
 | `flutter_background_service` | Background isolate + foreground service |
 | `flutter_background_service_android` | Android foreground service implementation |
 | `flutter_background_service_ios` | iOS background execution support |
+| `flutter_local_notifications` | Cross-platform local notifications for tracking display |
 | `dartz` | `Either<Failure, T>` for functional error handling |
 | `flutter_riverpod` | State management |
 | `sqflite` | Local SQLite database |
@@ -161,13 +238,17 @@ Tracking after the app is terminated (swiped away from recents) is achieved thro
 
 1. **Geolocator stream vs periodic polling**: The foreground uses a continuous stream with a 10m distance filter. The background uses periodic polling every 10 seconds. This means the background is less battery-efficient but more reliable across platform variations.
 
-2. **No map view**: A map showing the tracked path was not implemented but could be added using `flutter_map` or `google_maps_flutter`.
+2. **Notification throttling**: Notification updates are throttled to max once per 2 seconds to balance responsiveness with system performance and battery efficiency.
 
-3. **No unit tests**: Use case unit tests and widget tests were not implemented due to time constraints but the architecture is designed for easy testing (domain is pure Dart, repositories are abstracted).
+3. **iOS notification limitations**: iOS does not allow truly non-dismissible notifications for background location. The app relies on the system's blue location indicator in the status bar as the primary persistent visual cue. Local notifications are informational and can be dismissed.
 
-4. **Single notification channel**: The app uses the notification channel created by `flutter_background_service`. Custom notification styling is limited.
+4. **No map view**: A map showing the tracked path was not implemented but could be added using `flutter_map` or `google_maps_flutter`.
 
-5. **No boot-completed receiver**: The `RECEIVE_BOOT_COMPLETED` permission is declared but not yet utilized. A separate broadcast receiver would be needed to restart tracking after device reboot.
+5. **No unit tests**: Use case unit tests and widget tests were not implemented due to time constraints but the architecture is designed for easy testing (domain is pure Dart, repositories are abstracted).
+
+6. **Notification channel isolation**: Android's notification channel for flutter_background_service cannot be fully customized. The location tracking notification uses the same channel, so styling is consistent with the base service notification.
+
+7. **No boot-completed receiver**: The `RECEIVE_BOOT_COMPLETED` permission is declared but not yet utilized. A separate broadcast receiver would be needed to restart tracking after device reboot.
 
 ## Evaluation Criteria Compliance
 

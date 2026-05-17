@@ -225,6 +225,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enable location access to track your position'**
   String get locationPermissionRequiredDescription;
+
+  /// No description provided for @notificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Tracker'**
+  String get notificationTitle;
+
+  /// No description provided for @notificationLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get notificationLatitude;
+
+  /// No description provided for @notificationLongitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get notificationLongitude;
+
+  /// No description provided for @notificationUpdatedJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get notificationUpdatedJustNow;
+
+  /// No description provided for @notificationUpdatedSecondsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} seconds ago'**
+  String notificationUpdatedSecondsAgo(Object seconds);
+
+  /// No description provided for @notificationUpdatedMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes ago'**
+  String notificationUpdatedMinutesAgo(Object minutes);
+
+  /// No description provided for @notificationUpdatedHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours ago'**
+  String notificationUpdatedHoursAgo(Object hours);
+
+  /// No description provided for @notificationStopButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Tracking'**
+  String get notificationStopButton;
+
+  /// No description provided for @notificationAcquiringLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Acquiring location...'**
+  String get notificationAcquiringLocation;
+
+  /// No description provided for @notificationWaitingForGPS.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for GPS signal...'**
+  String get notificationWaitingForGPS;
 }
 
 class _AppLocalizationsDelegate

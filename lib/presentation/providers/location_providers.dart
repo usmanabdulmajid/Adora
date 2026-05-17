@@ -1,4 +1,6 @@
+import 'package:adora_assessment/presentation/providers/notification_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/datasources/location_datasource.dart';
 import '../../data/datasources/location_local_datasource.dart';
@@ -89,13 +91,35 @@ class TrackingStateNotifier extends AsyncNotifier<bool> {
   Future<bool> build() async {
     final repository = ref.read(locationRepositoryProvider);
     final either = await repository.isBackgroundTrackingActive();
-    return either.fold((_) => false, (running) => running);
+    final isRunning = either.fold((_) => false, (running) => running);
+
+    if (isRunning) {
+      _scheduleNotificationUpdates();
+    }
+
+    return isRunning;
   }
 
   Future<bool> _hasBackgroundPermission() async {
     final repository = ref.read(locationRepositoryProvider);
     final either = await repository.hasBackgroundPermission();
     return either.fold((_) => false, (has) => has);
+  }
+
+  void _scheduleNotificationUpdates() {
+    final locationStream = ref.watch(currentLocationStreamProvider);
+    locationStream.whenData((location) {
+      _updateNotificationWithLocation(location);
+    });
+  }
+
+  void _updateNotificationWithLocation(LocationEntity location) {
+    final updateUseCase = ref.read(updateLocationNotificationUseCaseProvider);
+    updateUseCase.call(
+      location.latitude,
+      location.longitude,
+      DateFormat('HH:mm:ss').format(location.timestamp),
+    );
   }
 
   Future<void> toggle() async {
@@ -107,22 +131,46 @@ class TrackingStateNotifier extends AsyncNotifier<bool> {
         ref.read(pendingPermissionDialogProvider.notifier).show();
         return;
       }
+
+      // Request notification permission before starting tracking
+      final requestPermUseCase = ref.read(
+        requestNotificationPermissionUseCaseProvider,
+      );
+      final permissionResult = await requestPermUseCase.call();
+      final hasNotificationPerm = permissionResult.fold(
+        (_) => false,
+        (granted) => granted,
+      );
+
+      if (!hasNotificationPerm) {
+        state = const AsyncData(false);
+        // Optionally show a dialog to inform user about notification permission
+        return;
+      }
     }
 
     state = const AsyncLoading();
 
     if (current) {
+      // Stopping tracking - hide notification
+      final hideUseCase = ref.read(hideLocationNotificationUseCaseProvider);
+      await hideUseCase.call();
+
       final either = await ref.read(stopTrackingUseCaseProvider).call();
       either.fold(
         (_) => state = const AsyncData(false),
         (_) => state = const AsyncData(false),
       );
     } else {
+      final showUseCase = ref.read(showLocationNotificationUseCaseProvider);
+
+      await showUseCase.call(0, 0, 'Acquiring location...');
+
       final either = await ref.read(startTrackingUseCaseProvider).call();
-      either.fold(
-        (_) => state = const AsyncData(false),
-        (_) => state = const AsyncData(true),
-      );
+      either.fold((_) => state = const AsyncData(false), (_) {
+        state = const AsyncData(true);
+        _scheduleNotificationUpdates();
+      });
     }
   }
 }

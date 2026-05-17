@@ -31,5 +31,30 @@
   "locationPermissionGranted": "Location Permission: Granted",
   "locationPermissionDenied": "Location Permission: Denied",
   "locationPermissionRequiredTitle": "Location permission required",
-  "locationPermissionRequiredDescription": "Enable location access to track your position"
+  "locationPermissionRequiredDescription": "Enable location access to track your position",
+  "notificationTitle": "Location Tracker",
+  "notificationLatitude": "Latitude",
+  "notificationLongitude": "Longitude",
+  "notificationUpdatedJustNow": "Just now",
+  "notificationUpdatedSecondsAgo": "{seconds} seconds ago",
+  "@notificationUpdatedSecondsAgo": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "notificationUpdatedMinutesAgo": "{minutes} minutes ago",
+  "@notificationUpdatedMinutesAgo": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "notificationUpdatedHoursAgo": "{hours} hours ago",
+  "@notificationUpdatedHoursAgo": {
+    "placeholders": {
+      "hours": {}
+    }
+  },
+  "notificationStopButton": "Stop Tracking",
+  "notificationAcquiringLocation": "Acquiring location...",
+  "notificationWaitingForGPS": "Waiting for GPS signal..."
 }

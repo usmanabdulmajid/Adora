@@ -80,4 +80,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get locationPermissionRequiredDescription =>
       'Enable location access to track your position';
+
+  @override
+  String get notificationTitle => 'Location Tracker';
+
+  @override
+  String get notificationLatitude => 'Latitude';
+
+  @override
+  String get notificationLongitude => 'Longitude';
+
+  @override
+  String get notificationUpdatedJustNow => 'Just now';
+
+  @override
+  String notificationUpdatedSecondsAgo(Object seconds) {
+    return '$seconds seconds ago';
+  }
+
+  @override
+  String notificationUpdatedMinutesAgo(Object minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String notificationUpdatedHoursAgo(Object hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String get notificationStopButton => 'Stop Tracking';
+
+  @override
+  String get notificationAcquiringLocation => 'Acquiring location...';
+
+  @override
+  String get notificationWaitingForGPS => 'Waiting for GPS signal...';
 }

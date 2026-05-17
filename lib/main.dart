@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'data/datasources/location_datasource.dart';
 import 'data/datasources/location_local_datasource.dart';
 import 'data/services/background_service.dart';
+import 'data/services/notification_service.dart';
 import 'l10n/app_localizations.dart';
 import 'presentation/screens/home_screen.dart';
 
@@ -13,6 +14,9 @@ void main() async {
   final localDataSource = LocationLocalDataSource();
   await localDataSource.initialize();
   await BackgroundService.initialize();
+
+  final notificationService = LocationNotificationService();
+  await notificationService.initialize();
 
   await LocationDataSource().requestPermission();
 
