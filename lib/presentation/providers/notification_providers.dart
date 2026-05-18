@@ -5,6 +5,9 @@ import 'package:adora_assessment/domain/usecases/hide_location_notification_usec
 import 'package:adora_assessment/domain/usecases/request_notification_permission_usecase.dart';
 import 'package:adora_assessment/domain/usecases/show_location_notification_usecase.dart';
 import 'package:adora_assessment/domain/usecases/update_location_notification_usecase.dart';
+
+//Note: Dependecies are also injected in the provider file
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final notificationServiceProvider = Provider<LocationNotificationService>((

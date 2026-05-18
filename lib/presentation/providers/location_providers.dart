@@ -13,6 +13,8 @@ import '../../domain/usecases/request_location_permission_usecase.dart';
 import '../../domain/usecases/start_tracking_usecase.dart';
 import '../../domain/usecases/stop_tracking_usecase.dart';
 
+//Note: Dependecies are also injected in the provider file
+
 final locationDataSourceProvider = Provider<LocationDataSource>((ref) {
   return LocationDataSource();
 });
