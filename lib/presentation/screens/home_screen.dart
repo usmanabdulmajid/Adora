@@ -20,6 +20,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ref.read(requestLocationPermissionUseCaseProvider).call();
+    });
     WidgetsBinding.instance.addObserver(this);
   }
 

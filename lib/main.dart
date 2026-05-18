@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'data/datasources/location_datasource.dart';
 import 'data/datasources/location_local_datasource.dart';
 import 'data/services/background_service.dart';
 import 'data/services/notification_service.dart';
@@ -17,8 +16,6 @@ void main() async {
 
   final notificationService = LocationNotificationService();
   await notificationService.initialize();
-
-  await LocationDataSource().requestPermission();
 
   final wasTracking = await localDataSource.getTrackingState();
   await localDataSource.clearOldLocations(const Duration(hours: 24));

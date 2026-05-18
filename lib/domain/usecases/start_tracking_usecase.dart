@@ -3,11 +3,11 @@ import '../entities/failure.dart';
 import '../repositories/location_repository.dart';
 
 class StartTrackingUseCase {
-  final LocationRepository repository;
+  final LocationRepository _repository;
 
-  StartTrackingUseCase(this.repository);
+  StartTrackingUseCase(this._repository);
 
   Future<Either<Failure, Unit>> call() {
-    return repository.startBackgroundTracking();
+    return _repository.startBackgroundTracking();
   }
 }

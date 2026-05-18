@@ -9,6 +9,7 @@ import '../../domain/entities/location_entity.dart';
 import '../../domain/repositories/location_repository.dart';
 import '../../domain/usecases/get_current_location_usecase.dart';
 import '../../domain/usecases/get_location_history_usecase.dart';
+import '../../domain/usecases/request_location_permission_usecase.dart';
 import '../../domain/usecases/start_tracking_usecase.dart';
 import '../../domain/usecases/stop_tracking_usecase.dart';
 
@@ -48,6 +49,13 @@ final getLocationHistoryUseCaseProvider = Provider<GetLocationHistoryUseCase>((
   return GetLocationHistoryUseCase(ref.watch(locationRepositoryProvider));
 });
 
+final requestLocationPermissionUseCaseProvider =
+    Provider<RequestLocationPermissionUseCase>((ref) {
+      return RequestLocationPermissionUseCase(
+        ref.watch(locationRepositoryProvider),
+      );
+    });
+
 final currentLocationStreamProvider = StreamProvider<LocationEntity>((ref) {
   final repository = ref.watch(locationRepositoryProvider);
   return repository.getLocationStream().map((either) {
@@ -69,8 +77,13 @@ final locationHistoryProvider = FutureProvider<List<LocationEntity>>((ref) {
 });
 
 final permissionStatusProvider = FutureProvider<bool>((ref) {
-  final dataSource = ref.watch(locationDataSourceProvider);
-  return dataSource.hasPermission();
+  final locationRepo = ref.watch(locationRepositoryProvider);
+  return locationRepo.hasPermission().then((either) {
+    return either.fold(
+      (failure) => throw Exception(failure.message),
+      (hasPermission) => hasPermission,
+    );
+  });
 });
 
 class PendingPermissionDialogNotifier extends Notifier<bool> {

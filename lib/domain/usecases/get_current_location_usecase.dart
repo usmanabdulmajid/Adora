@@ -4,11 +4,11 @@ import '../entities/failure.dart';
 import '../repositories/location_repository.dart';
 
 class GetCurrentLocationUseCase {
-  final LocationRepository repository;
+  final LocationRepository _repository;
 
-  GetCurrentLocationUseCase(this.repository);
+  GetCurrentLocationUseCase(this._repository);
 
   Future<Either<Failure, LocationEntity>> call() {
-    return repository.getCurrentLocation();
+    return _repository.getCurrentLocation();
   }
 }

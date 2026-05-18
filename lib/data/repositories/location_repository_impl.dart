@@ -97,4 +97,24 @@ class LocationRepositoryImpl implements LocationRepository {
           (e) => Left<Failure, LocationEntity>(Failure(e.toString())),
         );
   }
+
+  @override
+  Future<Either<Failure, bool>> requestPermission() async {
+    try {
+      final has = await _dataSource.requestPermission();
+      return Right(has);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> hasPermission() async {
+    try {
+      final has = await _dataSource.hasPermission();
+      return Right(has);
+    } catch (e) {
+      return Left(Failure(e.toString()));
+    }
+  }
 }
