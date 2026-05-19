@@ -42,12 +42,6 @@ class BackgroundService {
   static Future<bool> isRunning() async {
     return await _service.isRunning();
   }
-
-  static void listen(void Function(Map<String, dynamic> data) callback) {
-    _service.on('locationUpdate').listen((event) {
-      if (event != null) callback(event);
-    });
-  }
 }
 
 @pragma('vm:entry-point')
@@ -62,12 +56,16 @@ void _onStart(ServiceInstance service) async {
 
   DateTime? lastNotificationUpdate;
   const throttleDuration = Duration(seconds: 2);
+  late Timer periodicTimer;
+  late StreamSubscription<dynamic> stopServiceSubscription;
 
-  service.on('stopService').listen((event) {
+  stopServiceSubscription = service.on('stopService').listen((event) {
     service.stopSelf();
+    periodicTimer.cancel();
+    stopServiceSubscription.cancel();
   });
 
-  Timer.periodic(const Duration(seconds: 10), (timer) async {
+  periodicTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -83,12 +81,6 @@ void _onStart(ServiceInstance service) async {
 
       await localDataSource.insertLocation(model);
 
-      service.invoke('locationUpdate', {
-        'latitude': position.latitude,
-        'longitude': position.longitude,
-        'timestamp': DateTime.now().toIso8601String(),
-      });
-
       // Update notification with throttling
       final now = DateTime.now();
       if (lastNotificationUpdate == null ||
@@ -101,7 +93,9 @@ void _onStart(ServiceInstance service) async {
 
         lastNotificationUpdate = now;
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('start background service failed: ${e.toString()}');
+    }
   });
 }
 
