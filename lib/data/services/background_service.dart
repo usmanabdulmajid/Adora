@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adora_assessment/core/constants/duration.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:geolocator/geolocator.dart';
@@ -55,7 +56,6 @@ void _onStart(ServiceInstance service) async {
   await notificationService.initialize();
 
   DateTime? lastNotificationUpdate;
-  const throttleDuration = Duration(seconds: 2);
   late Timer periodicTimer;
   late StreamSubscription<dynamic> stopServiceSubscription;
 
@@ -65,7 +65,7 @@ void _onStart(ServiceInstance service) async {
     stopServiceSubscription.cancel();
   });
 
-  periodicTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+  periodicTimer = Timer.periodic(KDuration.backgroundDelay, (timer) async {
     try {
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
@@ -84,7 +84,7 @@ void _onStart(ServiceInstance service) async {
       // Update notification with throttling
       final now = DateTime.now();
       if (lastNotificationUpdate == null ||
-          now.difference(lastNotificationUpdate!) >= throttleDuration) {
+          now.difference(lastNotificationUpdate!) >= KDuration.throttle) {
         await notificationService.showPersistentNotification(
           model.latitude,
           model.longitude,

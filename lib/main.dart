@@ -1,3 +1,4 @@
+import 'package:adora_assessment/core/constants/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,7 +19,7 @@ void main() async {
   await notificationService.initialize();
 
   final wasTracking = await localDataSource.getTrackingState();
-  await localDataSource.clearOldLocations(const Duration(hours: 24));
+  await localDataSource.clearOldLocations(KDuration.day);
 
   runApp(const ProviderScope(child: LocationTrackerApp()));
 
