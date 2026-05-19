@@ -1,4 +1,5 @@
 import 'package:adora_assessment/l10n/app_localizations.dart';
+import 'package:adora_assessment/presentation/constants/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -17,7 +18,7 @@ class PermissionDialogWidget extends StatelessWidget {
             color: Theme.of(context).colorScheme.primary,
             size: 28,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSizes.spacingMedium),
           Expanded(
             child: Text(
               l10n.backgroundTrackingDialogTitle,

@@ -1,4 +1,5 @@
 import 'package:adora_assessment/l10n/app_localizations.dart';
+import 'package:adora_assessment/presentation/constants/dimensions.dart';
 import 'package:adora_assessment/presentation/providers/location_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,7 +27,7 @@ class TrackingToggleWidget extends ConsumerWidget {
                     ? Theme.of(context).colorScheme.primary
                     : Colors.grey,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSizes.spacingMedium),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,9 +76,11 @@ class TrackingToggleWidget extends ConsumerWidget {
               ),
               if (trackingAsync.isLoading)
                 const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  width: AppSizes.loadingIndicatorLarge,
+                  height: AppSizes.loadingIndicatorLarge,
+                  child: CircularProgressIndicator(
+                    strokeWidth: AppSizes.progressIndicatorStrokeWidth,
+                  ),
                 )
               else
                 Switch(

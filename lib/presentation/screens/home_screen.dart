@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../constants/dimensions.dart';
 import '../providers/location_providers.dart';
 import '../widgets/location_display_widget.dart';
 import '../widgets/permission_dialog_widget.dart';
@@ -96,13 +97,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSizes.spacingSmall),
               const PermissionIndicatorWidget(),
               const LocationDisplayWidget(),
               const TrackingToggleWidget(),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSizes.spacingLarge),
               const TrackingHistoryWidget(),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSizes.spacingExtraLarge),
             ],
           ),
         ),

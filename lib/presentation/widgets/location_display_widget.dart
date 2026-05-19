@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../constants/dimensions.dart';
 import '../providers/location_providers.dart';
 
 class LocationDisplayWidget extends ConsumerWidget {
@@ -30,14 +31,14 @@ class LocationDisplayWidget extends ConsumerWidget {
                       ? Theme.of(context).colorScheme.primary
                       : Colors.grey,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSizes.spacingSmall),
                 Text(
                   l10n.currentLocation,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSizes.spacingMedium),
             permissionAsync.when(
               data: (granted) {
                 if (!granted) {
@@ -51,12 +52,12 @@ class LocationDisplayWidget extends ConsumerWidget {
                         l10n.latitude,
                         location.latitude.toStringAsFixed(6),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSizes.spacingExtraSmall),
                       InfoRow(
                         l10n.longitude,
                         location.longitude.toStringAsFixed(6),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSizes.spacingExtraSmall),
                       InfoRow(
                         l10n.timestamp,
                         DateFormat(
@@ -108,7 +109,7 @@ class PermissionDeniedWidget extends StatelessWidget {
               context,
             ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSizes.spacingSmall),
           Text(
             l10n.locationPermissionRequiredTitle,
             style: TextStyle(
@@ -116,7 +117,7 @@ class PermissionDeniedWidget extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSizes.spacingExtraSmall),
           Text(
             l10n.locationPermissionRequiredDescription,
             style: TextStyle(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../constants/dimensions.dart';
 import '../providers/location_providers.dart';
 
 class PermissionIndicatorWidget extends ConsumerWidget {
@@ -21,7 +22,7 @@ class PermissionIndicatorWidget extends ConsumerWidget {
             child: Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.green, size: 16),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSizes.spacingSmall),
                 Text(
                   l10n.locationPermissionGranted,
                   style: const TextStyle(fontSize: 13, color: Colors.green),
@@ -46,7 +47,7 @@ class PermissionIndicatorWidget extends ConsumerWidget {
                     color: Theme.of(context).colorScheme.error,
                     size: 20,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSizes.spacingMedium),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,12 +91,12 @@ class PermissionIndicatorWidget extends ConsumerWidget {
       },
       error: (_, _) => const SizedBox.shrink(),
       loading: () => const SizedBox(
-        height: 16,
+        height: AppSizes.loadingIndicatorMedium,
         child: Center(
           child: SizedBox(
-            width: 12,
-            height: 12,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            width: AppSizes.loadingIndicatorSmall,
+            height: AppSizes.loadingIndicatorSmall,
+            child: CircularProgressIndicator(strokeWidth: AppSizes.progressIndicatorStrokeWidth),
           ),
         ),
       ),

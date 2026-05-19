@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../constants/dimensions.dart';
 import '../providers/location_providers.dart';
 
 class TrackingHistoryWidget extends ConsumerWidget {
@@ -26,14 +27,14 @@ class TrackingHistoryWidget extends ConsumerWidget {
                   Icons.history,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSizes.spacingSmall),
                 Text(
                   l10n.trackingHistory,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSizes.spacingMedium),
             historyAsync.when(
               data: (locations) {
                 if (locations.isEmpty) {
