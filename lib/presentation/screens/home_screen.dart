@@ -18,13 +18,20 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
+  bool _hasRequestedLocationPermission = false;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      ref.read(requestLocationPermissionUseCaseProvider).call();
-    });
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasRequestedLocationPermission) {
+      ref.read(requestLocationPermissionUseCaseProvider).call();
+      _hasRequestedLocationPermission = true;
+    }
   }
 
   @override
