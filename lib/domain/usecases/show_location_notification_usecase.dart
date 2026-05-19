@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../entities/failure.dart';
+import '../../core/failure/failure.dart';
 import '../repositories/notification_repository.dart';
 
 class ShowLocationNotificationUseCase {
@@ -7,11 +7,11 @@ class ShowLocationNotificationUseCase {
 
   ShowLocationNotificationUseCase(this._notificationRepository);
 
-  Future<Either<Failure, void>> call(
-    double latitude,
-    double longitude,
-    String updatedText,
-  ) {
+  Future<Either<Failure, void>> call({
+    required double latitude,
+    required double longitude,
+    required String updatedText,
+  }) {
     return _notificationRepository.showTrackingNotification(
       latitude,
       longitude,

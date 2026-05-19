@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:geolocator/geolocator.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../providers/location_providers.dart';
 import '../widgets/location_display_widget.dart';
+import '../widgets/permission_dialog_widget.dart';
 import '../widgets/permission_indicator_widget.dart';
 import '../widgets/tracking_history_widget.dart';
+import '../widgets/tracking_toggle_widget.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -56,70 +57,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Future<void> _showPermissionDialog() async {
-    final l10n = AppLocalizations.of(context)!;
     final dialogResult = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(
-              Icons.location_on,
-              color: Theme.of(context).colorScheme.primary,
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                l10n.backgroundTrackingDialogTitle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 8),
-          child: Text(
-            l10n.backgroundTrackingDialogContent,
-            style: const TextStyle(fontSize: 14, height: 1.5),
-          ),
-        ),
-        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(l10n.cancel, style: const TextStyle(fontSize: 15)),
-          ),
-          FilledButton.icon(
-            onPressed: () {
-              Geolocator.openAppSettings();
-              Navigator.of(context).pop(true);
-            },
-            icon: const Icon(Icons.settings, size: 18),
-            label: Text(
-              l10n.openSettings,
-              style: const TextStyle(fontSize: 15),
-            ),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => PermissionDialogWidget(),
     );
-    if (dialogResult == null || !dialogResult) {
+    if (dialogResult == null || !dialogResult && context.mounted) {
       ref.read(pendingPermissionDialogProvider.notifier).dismiss();
     }
   }
@@ -127,7 +69,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final trackingAsync = ref.watch(trackingStateProvider);
 
     ref.listen<bool>(pendingPermissionDialogProvider, (_, next) {
       if (next) {
@@ -151,102 +92,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               const SizedBox(height: 8),
               const PermissionIndicatorWidget(),
               const LocationDisplayWidget(),
-              _buildTrackingToggle(context, ref, trackingAsync),
+              const TrackingToggleWidget(),
               const SizedBox(height: 16),
               const TrackingHistoryWidget(),
               const SizedBox(height: 24),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTrackingToggle(
-    BuildContext context,
-    WidgetRef ref,
-    AsyncValue<bool> trackingAsync,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    final permissionAsync = ref.watch(permissionStatusProvider);
-    final hasPermission = permissionAsync.asData?.value ?? false;
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Opacity(
-        opacity: hasPermission ? 1.0 : 0.5,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              Icon(
-                Icons.track_changes,
-                color: hasPermission
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.backgroundTracking,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: hasPermission ? null : Colors.grey,
-                      ),
-                    ),
-                    if (hasPermission)
-                      trackingAsync.when(
-                        data: (isRunning) => Text(
-                          isRunning ? l10n.active : l10n.inactive,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isRunning ? Colors.green : Colors.grey,
-                          ),
-                        ),
-                        error: (_, _) => Text(
-                          l10n.inactive,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        loading: () => Text(
-                          l10n.loading,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      )
-                    else
-                      Text(
-                        l10n.locationPermissionRequiredTitle,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (trackingAsync.isLoading)
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else
-                Switch(
-                  value: trackingAsync.asData?.value ?? false,
-                  onChanged: hasPermission
-                      ? (_) {
-                          ref.read(trackingStateProvider.notifier).toggle();
-                        }
-                      : null,
-                ),
             ],
           ),
         ),

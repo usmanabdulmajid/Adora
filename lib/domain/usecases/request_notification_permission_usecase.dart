@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../entities/failure.dart';
+import '../../core/failure/failure.dart';
 import '../repositories/notification_repository.dart';
 
 class RequestNotificationPermissionUseCase {

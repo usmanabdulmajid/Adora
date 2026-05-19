@@ -14,6 +14,7 @@ class LocationDisplayWidget extends ConsumerWidget {
     final permissionAsync = ref.watch(permissionStatusProvider);
     final locationAsync = ref.watch(currentLocationStreamProvider);
     final hasPermission = permissionAsync.asData?.value ?? false;
+
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -40,23 +41,23 @@ class LocationDisplayWidget extends ConsumerWidget {
             permissionAsync.when(
               data: (granted) {
                 if (!granted) {
-                  return _permissionDeniedContent(l10n, context);
+                  return PermissionDeniedWidget();
                 }
                 return locationAsync.when(
                   data: (location) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _infoRow(
+                      InfoRow(
                         l10n.latitude,
                         location.latitude.toStringAsFixed(6),
                       ),
                       const SizedBox(height: 4),
-                      _infoRow(
+                      InfoRow(
                         l10n.longitude,
                         location.longitude.toStringAsFixed(6),
                       ),
                       const SizedBox(height: 4),
-                      _infoRow(
+                      InfoRow(
                         l10n.timestamp,
                         DateFormat(
                           'yyyy-MM-dd HH:mm:ss',
@@ -89,8 +90,14 @@ class LocationDisplayWidget extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _permissionDeniedContent(AppLocalizations l10n, BuildContext context) {
+class PermissionDeniedWidget extends StatelessWidget {
+  const PermissionDeniedWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         children: [
@@ -123,8 +130,15 @@ class LocationDisplayWidget extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _infoRow(String label, String value) {
+class InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const InfoRow(this.label, this.value, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

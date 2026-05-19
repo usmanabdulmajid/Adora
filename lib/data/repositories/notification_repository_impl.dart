@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../domain/entities/failure.dart';
+import '../../core/failure/failure.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../services/notification_service.dart';
 

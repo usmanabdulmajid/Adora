@@ -131,9 +131,9 @@ class TrackingStateNotifier extends AsyncNotifier<bool> {
   void _updateNotificationWithLocation(LocationEntity location) {
     final updateUseCase = ref.read(updateLocationNotificationUseCaseProvider);
     updateUseCase.call(
-      location.latitude,
-      location.longitude,
-      DateFormat('HH:mm:ss').format(location.timestamp),
+      latitude: location.latitude,
+      longitude: location.longitude,
+      updatedText: DateFormat('HH:mm:ss').format(location.timestamp),
     );
   }
 
@@ -179,7 +179,11 @@ class TrackingStateNotifier extends AsyncNotifier<bool> {
     } else {
       final showUseCase = ref.read(showLocationNotificationUseCaseProvider);
 
-      await showUseCase.call(0, 0, 'Acquiring location...');
+      await showUseCase.call(
+        latitude: 0,
+        longitude: 0,
+        updatedText: 'Acquiring location...',
+      );
 
       final either = await ref.read(startTrackingUseCaseProvider).call();
       either.fold((_) => state = const AsyncData(false), (_) {
