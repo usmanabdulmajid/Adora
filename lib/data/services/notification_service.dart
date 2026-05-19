@@ -6,6 +6,27 @@ class LocationNotificationService {
   static const String channelId = 'location_tracking_channel';
   static const String channelName = 'Location Tracking';
 
+  static const AndroidNotificationDetails _androidDetails =
+      AndroidNotificationDetails(
+        channelId,
+        channelName,
+        channelDescription:
+            'Shows current location information while tracking is active',
+        importance: Importance.high,
+        priority: Priority.high,
+        ongoing: true,
+        autoCancel: false,
+        playSound: false,
+      );
+
+  static const DarwinNotificationDetails _iOSDetails =
+      DarwinNotificationDetails();
+
+  static const NotificationDetails _platformDetails = NotificationDetails(
+    android: _androidDetails,
+    iOS: _iOSDetails,
+  );
+
   late final FlutterLocalNotificationsPlugin _notificationsPlugin;
 
   LocationNotificationService() {
@@ -93,59 +114,20 @@ class LocationNotificationService {
         '${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)}';
     final body = '$position\nTime: $updatedText';
 
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          channelId,
-          channelName,
-          channelDescription:
-              'Shows current location information while tracking is active',
-          importance: Importance.high,
-          priority: Priority.high,
-          ongoing: true,
-          autoCancel: false,
-          playSound: false,
-        );
-
-    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails();
-
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iOSDetails,
-    );
-
     await _notificationsPlugin.show(
       notificationId,
       '📍 Location Tracker',
       body,
-      platformDetails,
+      _platformDetails,
     );
   }
 
   Future<void> showAcquiringLocationNotification(String acquiringText) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-          channelId,
-          channelName,
-          channelDescription:
-              'Shows current location information while tracking is active',
-          importance: Importance.high,
-          priority: Priority.high,
-          ongoing: true,
-          autoCancel: false,
-        );
-
-    const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails();
-
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iOSDetails,
-    );
-
     await _notificationsPlugin.show(
       notificationId,
       '📍 Location Tracker',
       acquiringText,
-      platformDetails,
+      _platformDetails,
     );
   }
 
