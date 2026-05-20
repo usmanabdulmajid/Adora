@@ -20,11 +20,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with WidgetsBindingObserver {
   bool _hasRequestedLocationPermission = false;
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
 
   @override
   void didChangeDependencies() {
@@ -32,35 +27,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     if (!_hasRequestedLocationPermission) {
       ref.read(requestLocationPermissionUseCaseProvider).call();
       _hasRequestedLocationPermission = true;
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.invalidate(locationHistoryProvider);
-      ref.invalidate(permissionStatusProvider);
-      ref.invalidate(currentLocationStreamProvider);
-      _handleResume();
-    }
-  }
-
-  Future<void> _handleResume() async {
-    final pending = ref.read(pendingPermissionDialogProvider);
-    if (pending) {
-      final repository = ref.read(locationRepositoryProvider);
-      final either = await repository.hasBackgroundPermission();
-      final hasPerm = either.fold((_) => false, (has) => has);
-      if (hasPerm) {
-        ref.read(trackingStateProvider.notifier).toggle();
-      }
-      ref.read(pendingPermissionDialogProvider.notifier).dismiss();
     }
   }
 
@@ -77,6 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    ref.watch(analyticalTrackingProvider);
 
     ref.listen<bool>(pendingPermissionDialogProvider, (_, next) {
       if (next) {

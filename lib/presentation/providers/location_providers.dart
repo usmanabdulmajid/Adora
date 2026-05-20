@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:adora_assessment/presentation/providers/notification_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/controllers/lifecycle_aware_controller.dart';
 import '../../data/datasources/location_datasource.dart';
 import '../../data/datasources/location_local_datasource.dart';
 import '../../data/repositories/location_repository_impl.dart';
@@ -9,6 +12,7 @@ import '../../domain/entities/location_entity.dart';
 import '../../domain/repositories/location_repository.dart';
 import '../../domain/usecases/get_current_location_usecase.dart';
 import '../../domain/usecases/get_location_history_usecase.dart';
+import '../../domain/usecases/observe_app_lifecycle_usecase.dart';
 import '../../domain/usecases/request_location_permission_usecase.dart';
 import '../../domain/usecases/start_tracking_usecase.dart';
 import '../../domain/usecases/stop_tracking_usecase.dart';
@@ -57,6 +61,49 @@ final requestLocationPermissionUseCaseProvider =
         ref.watch(locationRepositoryProvider),
       );
     });
+
+final lifecycleControllerProvider =
+    Provider.autoDispose<LifecycleAwareController>((ref) {
+      final controller = LifecycleAwareController();
+      ref.onDispose(() => controller.dispose());
+      return controller;
+    });
+
+final observeLifecycleUseCaseProvider =
+    Provider.autoDispose<ObserveAppLifecycleUseCase>((ref) {
+      final controller = ref.watch(lifecycleControllerProvider);
+      return ObserveAppLifecycleUseCase(lifecycleController: controller);
+    });
+
+final appLifecycleStatusProvider =
+    StreamProvider.autoDispose<AppLifecycleState>((ref) {
+      final useCase = ref.watch(observeLifecycleUseCaseProvider);
+      return useCase.call();
+    });
+
+final analyticalTrackingProvider = Provider.autoDispose<void>((ref) {
+  final lifecycleAsync = ref.watch(appLifecycleStatusProvider);
+
+  lifecycleAsync.whenData((AppLifecycleState state) async {
+    final currentState = state;
+    if (currentState == AppLifecycleState.resumed) {
+      ref.invalidate(locationHistoryProvider);
+      ref.invalidate(permissionStatusProvider);
+      ref.invalidate(currentLocationStreamProvider);
+
+      final pending = ref.read(pendingPermissionDialogProvider);
+      if (pending) {
+        final repository = ref.read(locationRepositoryProvider);
+        final either = await repository.hasBackgroundPermission();
+        final hasPerm = either.fold((_) => false, (has) => has);
+        if (hasPerm) {
+          ref.read(trackingStateProvider.notifier).toggle();
+        }
+        ref.read(pendingPermissionDialogProvider.notifier).dismiss();
+      }
+    }
+  });
+});
 
 final currentLocationStreamProvider = StreamProvider<LocationEntity>((ref) {
   final repository = ref.watch(locationRepositoryProvider);
